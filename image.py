@@ -35,7 +35,8 @@ def new_matrix(rows = 4, cols = 4):
     return m
 
 def make_hermite():
-    pass
+    t = [[2, -2, 1, 1], [-3, 3, -2, -1], [0, 0, 1, 0], [1, 0, 0, 0]]
+    return t
 
 def make_translate( x, y, z ):
     t = new_matrix()
@@ -207,24 +208,28 @@ class picture:
             theta += step
 
 
-    def add_curve(x0, y0, x1, y1, x2, y2, x3, y3, step, curve_type ):
+    def add_curve(self, x0, y0, x1, y1, x2, y2, x3, y3, step, curve_type ):
         if curve_type == "bezier":
             xa = (-1 * x0) + (3 * x1) - (3 * x2) + (x * 3)
             xb = (3 * x0) - (6 * x1) + (3 * x2)
             xc = (-3 * x0) + (3 * x1)
             xd = p0
-            for(t = 0, t < 1, t += 0.02):
+            for(t = 0, t < 1, t += step):
                 plotx = xa * t * t * t + xb * t * t + xc * t + xd
 	            ploty = ya * t * t * t + yb * t * t + yc * t + yd
 
-	            dt = t + 0.02
+	            dt = t + step
 
 	            newplotx = xa * dt * dt * dt + xb * dt * dt + xc * dt + xd
 	            newploty = ya * dt * dt * dt + yb * dt * dt + yc * dt + yd
 
-	            add_edge(plotx, ploty, 1, newplotx, newploty, 1)
+	            self.add_edge(plotx, ploty, 1, newplotx, newploty, 1)
         else:
-            pass
+            m = make_hermite()
+            pmatrix = [[x0, y0, 1], [x1, y1, 1], [x2, y2, 1], [x3, y3, 1]]
+            for(t = 0, t < 1, t += step):
+                tmatrix = [t * t * t, t * t, t, 1]
+                self.add_3d_point(matrix_mult(matrix_mult(tmatrix, m), pmatrix))
 
 
     def draw_lines( matrix, screen, color ):
@@ -281,19 +286,6 @@ def display_matrix(x):
     for i in x:
         print(i)
 
-def multiply_matrices(x,y):
-#this function is meant to take in rectangular matrices and multiply them in order given
-    #Python doesn't generate matrices like this: result = [len(y)][len(y[0])] IW
-    result_matrix = [([0] * len(y[0])) for i in range(len(y))]#[len(y)][len(y[0])]
-    print(result_matrix)
-    for i in range(len(x)):
-        for j in range(len(y[0])):
-            for k in range(len(y)):
-                result_matrix[i][j] += x[i][k] * y[k][j]
-    display_matrix(result_matrix)
-    y = result_matrix #Alters the second matrix IW
-    return result_matrix
-
 ARG_COMMANDS = [ 'line', 'scale', 'move', 'rotate', 'save', 'bezier', 'hermite', 'circle' ]
 
 def parse_file( fname, edges, transform, screen, color ):
@@ -321,14 +313,14 @@ def parse_file( fname, edges, transform, screen, color ):
             screen.add_circle(float(args[0]), float(args[1]), float(args[2]), float(args[3]), 1)
 
         elif line == 'bezier':
-            add_curve(float(args[0]), float(args[1]), float(args[2],
-                      float(args[3]), float(args[4]), float(args[5],
-                      float(args[6]), float(args[7], 0.02, "bezier")
+            screen.add_curve(float(args[0]), float(args[1]), float(args[2]),
+                      float(args[3]), float(args[4]), float(args[5]),
+                      float(args[6]), float(args[7]), 0.02, "bezier")
 
         elif line == 'hermite':
-            add_curve(float(args[0]), float(args[1]), float(args[2],
-                      float(args[3]), float(args[4]), float(args[5],
-                      float(args[6]), float(args[7], 0.02, "hermite")
+            screen.add_curve(float(args[0]), float(args[1]), float(args[2]),
+                      float(args[3]), float(args[4]), float(args[5]),
+                      float(args[6]), float(args[7]), 0.02, "hermite")
 
         elif line == 'scale':
             #print 'SCALE\t' + str(args)
