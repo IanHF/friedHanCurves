@@ -34,15 +34,8 @@ def new_matrix(rows = 4, cols = 4):
             m[c].append( 0 )
     return m
 
-def make_bezier():
-    pass
-
 def make_hermite():
     pass
-
-def generate_curve_coefs( p0, p1, p2, p3, t ):
-    pass
-
 
 def make_translate( x, y, z ):
     t = new_matrix()
@@ -202,19 +195,36 @@ class picture:
         self.add_3d_point(x1,y1,z1)
 
 
-    def add_circle(self, points, cx, cy, cz, r, step ):
+    def add_circle(self, cx, cy, cz, r, step ):
         centx = cx
         centy = cy
         theta = 0
         while(theta != 360):
             secondpoints = circle_point(centx, centy, step, r)
-            add_edge(centx, centy, 1, secondpoints[0], secondpoints[1], 1)
+            self.add_edge(centx, centy, 1, secondpoints[0], secondpoints[1], 1)
             centx = secondpoints[0]
             centy = secondpoints[1]
             theta += step
 
 
-    def add_curve( points, x0, y0, x1, y1, x2, y2, x3, y3, step, curve_type ):
+    def add_curve(x0, y0, x1, y1, x2, y2, x3, y3, step, curve_type ):
+        if curve_type == "bezier":
+            xa = (-1 * x0) + (3 * x1) - (3 * x2) + (x * 3)
+            xb = (3 * x0) - (6 * x1) + (3 * x2)
+            xc = (-3 * x0) + (3 * x1)
+            xd = p0
+            for(t = 0, t < 1, t += 0.02):
+                plotx = xa * t * t * t + xb * t * t + xc * t + xd
+	            ploty = ya * t * t * t + yb * t * t + yc * t + yd
+
+	            dt = t + 0.02
+
+	            newplotx = xa * dt * dt * dt + xb * dt * dt + xc * dt + xd
+	            newploty = ya * dt * dt * dt + yb * dt * dt + yc * dt + yd
+
+	            add_edge(plotx, ploty, 1, newplotx, newploty, 1)
+        else:
+            pass
 
 
     def draw_lines( matrix, screen, color ):
@@ -308,13 +318,17 @@ def parse_file( fname, edges, transform, screen, color ):
                       float(args[3]), float(args[4]), float(args[5]) )
 
         elif line == 'circle':
-            pass
+            screen.add_circle(float(args[0]), float(args[1]), float(args[2]), float(args[3]), 1)
 
         elif line == 'bezier':
-            pass
+            add_curve(float(args[0]), float(args[1]), float(args[2],
+                      float(args[3]), float(args[4]), float(args[5],
+                      float(args[6]), float(args[7], 0.02, "bezier")
 
         elif line == 'hermite':
-            pass
+            add_curve(float(args[0]), float(args[1]), float(args[2],
+                      float(args[3]), float(args[4]), float(args[5],
+                      float(args[6]), float(args[7], 0.02, "hermite")
 
         elif line == 'scale':
             #print 'SCALE\t' + str(args)
